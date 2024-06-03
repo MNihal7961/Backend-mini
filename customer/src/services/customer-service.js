@@ -21,13 +21,8 @@ class CustomerService {
       const existingCustomer = await this.repository.FindCustomer({ email });
 
       if (existingCustomer) {
-        const validPassword = await ValidatePassword(
-          password,
-          existingCustomer.password,
-          existingCustomer.salt
-        );
 
-        if (validPassword) {
+        if (existingCustomer.password === password) {
           const token = await GenerateSignature({
             email: existingCustomer.email,
             _id: existingCustomer._id,
@@ -46,14 +41,9 @@ class CustomerService {
     const { email, password, phone } = userInputs;
 
     try {
-      // create salt
-      let salt = await GenerateSalt();
-
-      let userPassword = await GeneratePassword(password, salt);
-
       const existingCustomer = await this.repository.CreateCustomer({
         email,
-        password: userPassword,
+        password,
         phone,
         salt,
       });
@@ -155,7 +145,7 @@ class CustomerService {
     }
   }
 
-  
+
 
   async SubscribeEvents(payload) {
     const { event, data } = payload;
